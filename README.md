@@ -95,11 +95,17 @@ OS 및 환경에 따라 뷰어 실행 명령어가 다릅니다.
 
 ```
 tri_hand/
-├── src/
+├── docs/               # MuJoCo 이론 및 배경 학습 자료, 데모 미디어
+├── src/                # 메인 시뮬레이션 모델 및 제어 환경
 │   ├── scene.xml       # 전체 시뮬레이션 씬 (바닥, 조명, 타겟 물체 등)
 │   ├── hand.xml        # 로봇 손 기구학/동역학 모델
 │   ├── meshes/         # 3D STL 메쉬 파일
 │   └── run_sim.py      # 시뮬레이션 실행 및 손가락 제어 스크립트
+├── tutorial/           # MuJoCo 모델링 기초 단계별 실습 예제
+│   ├── 01_hello.xml    # 기본 세상 구성 및 자유 낙하
+│   ├── 02_joints_tendon.xml # 다관절 링크 및 텐던 실습
+│   └── run.py          # 튜토리얼 실행 스크립트
+├── AGENTS.md           # 시뮬레이션 에이전트 지침 및 하드웨어 명세
 ├── requirements.txt    # 크로스 플랫폼 호환 파이썬 의존성
 ├── .gitignore          # 깃 추적 제외 목록 (가상환경, 캐시 등)
 └── README.md           # 프로젝트 안내서
