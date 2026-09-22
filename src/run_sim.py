@@ -1,0 +1,65 @@
+"""tri_hand MuJoCo 데모: 세 손가락을 주기적으로 오므렸다 펴는 위치 제어.
+
+사용법
+  python run_sim.py              # 뷰어 실행 (macOS는 mjpython run_sim.py)
+  python run_sim.py --headless   # 뷰어 없이 수치만 확인 (WSL2/서버 등)
+"""
+import argparse
+import time
+from pathlib import Path
+
+import mujoco
+import numpy as np
+
+SCENE = Path(__file__).with_name("scene.xml")
+
+# 모든 관절 축이 +X라서 A(위쪽)는 음수, B/C(아래쪽)는 양수 방향이 '오므림'.
+CLOSE_SIGN = {"A": -1.0, "B": +1.0, "C": +1.0}
+Q_CLOSE = {"j1": 0.3, "j2": 1.2}   # rad, 오므렸을 때 목표 각도 (크기). 이 값까지는 손가락끼리 안 부딪힘
+PERIOD = 4.0                       # s, 한 번 오므렸다 펴는 주기
+
+
+def command(t: float) -> dict[str, float]:
+    """t 시점의 관절별 목표 각도. 0(펼침) ↔ 1(오므림)을 코사인으로 부드럽게."""
+    s = 0.5 * (1.0 - np.cos(2.0 * np.pi * t / PERIOD))
+    return {f"{f}_{j}": CLOSE_SIGN[f] * Q_CLOSE[j] * s
+            for f in "ABC" for j in ("j1", "j2")}
+
+
+def apply_ctrl(model, data):
+    for joint_name, q_des in command(data.time).items():
+        data.ctrl[model.actuator(f"{joint_name}_act").id] = q_des
+
+
+def run_headless(model, data, seconds=8.0):
+    ball = model.body("ball").id
+    steps = int(seconds / model.opt.timestep)
+    for i in range(steps):
+        apply_ctrl(model, data)
+        mujoco.mj_step(model, data)
+        if i % int(1.0 / model.opt.timestep) == 0:
+            print(f"t={data.time:4.1f}s  ball(mm)={np.round(data.xpos[ball]*1000, 1)}  "
+                  f"contacts={data.ncon}  max|qvel|={np.abs(data.qvel[:6]).max():.2f}")
+    assert np.isfinite(data.qpos).all(), "시뮬레이션이 발산했습니다"
+
+
+def run_viewer(model, data):
+    import mujoco.viewer
+    with mujoco.viewer.launch_passive(model, data) as v:
+        v.cam.type = mujoco.mjtCamera.mjCAMERA_FIXED
+        v.cam.fixedcamid = model.camera("iso").id
+        while v.is_running():
+            t0 = time.time()
+            apply_ctrl(model, data)
+            mujoco.mj_step(model, data)
+            v.sync()
+            time.sleep(max(0.0, model.opt.timestep - (time.time() - t0)))
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--headless", action="store_true")
+    args = ap.parse_args()
+    model = mujoco.MjModel.from_xml_path(str(SCENE))
+    data = mujoco.MjData(model)
+    (run_headless if args.headless else run_viewer)(model, data)
