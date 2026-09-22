@@ -2,6 +2,12 @@
 
 3지 다관절 로봇 손(`tri_hand`)의 물리 시뮬레이션을 위한 MuJoCo 환경 프로젝트입니다.
 
+<p align="center">
+  <img src="docs/mujoco.gif" alt="tri_hand MuJoCo 시뮬레이션 데모" width="100%">
+  <br>
+  <em>🎬 시뮬레이션 데모 (고화질 원본: <a href="docs/mujoco.mp4">docs/mujoco.mp4</a>)</em>
+</p>
+
 ---
 
 ## 💻 지원 OS 및 환경 요건
