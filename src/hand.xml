@@ -4,7 +4,8 @@
 
   <asset>
     <mesh name="palm" file="palm.stl" scale="0.001 0.001 0.001"/>
-    <mesh name="unit" file="unit.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="actuator" file="actuator.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="hinge_frame" file="hinge_frame.stl" scale="0.001 0.001 0.001"/>
   </asset>
 
   <default>
@@ -41,44 +42,65 @@
           pos="0.0298 -0.0655 0.0220" size="0.0550 0.0030 0.0260"/>
 
     <!-- ===== Finger A ===== -->
+    <!-- Hinge Frame 1 (Palm 베이스에 고정) -->
+    <geom name="A_frame1" class="visual" mesh="hinge_frame"
+          pos="0.0290 -0.0155 0.1100" euler="0 0 3.14159" rgba="0.22 0.47 0.76 1"/>
+
     <body name="A_link1" pos="0.0290 -0.0155 0.1100">
-      <joint name="A_j1"/>
-      <inertial pos="0 0 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
-      <geom class="visual" mesh="unit" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
-      <geom class="collision" type="box" pos="-0.00041 -0.007855 -0.00003" size="0.0207 0.03163 0.01425"/>
+      <joint name="A_j1" pos="0 -0.011475 0"/>
+      <inertial pos="0 0.015 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
+      <geom name="A_actuator1" class="visual" mesh="actuator" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
+      <geom class="collision" type="box" pos="0.00134 0.00052 -0.00003" size="0.01895 0.02325 0.01425"/>
+      <!-- Hinge Frame 2 (Actuator 1 상단에 고정 결합) -->
+      <geom name="A_frame2" class="visual" mesh="hinge_frame" pos="0 0.0633 0" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
+
       <body name="A_link2" pos="0 0.0633 0">
-        <joint name="A_j2"/>
-        <inertial pos="0 0 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
-        <geom class="visual" mesh="unit" euler="0 0 3.14159" rgba="0.12 0.62 0.47 1"/>
-        <geom class="collision" type="box" pos="-0.00041 -0.007855 -0.00003" size="0.0207 0.03163 0.01425"/>
+        <joint name="A_j2" pos="0 -0.011475 0"/>
+        <inertial pos="0 0.015 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
+        <geom name="A_actuator2" class="visual" mesh="actuator" euler="0 0 3.14159" rgba="0.12 0.62 0.47 1"/>
+        <geom class="collision" type="box" pos="0.00134 0.00052 -0.00003" size="0.01895 0.02325 0.01425"/>
       </body>
     </body>
 
     <!-- ===== Finger B ===== -->
+    <!-- Hinge Frame 1 (Palm 베이스에 고정) -->
+    <geom name="B_frame1" class="visual" mesh="hinge_frame"
+          pos="-0.0050 -0.0155 0.0100" euler="0 0 3.14159" rgba="0.22 0.47 0.76 1"/>
+
     <body name="B_link1" pos="-0.0050 -0.0155 0.0100">
-      <joint name="B_j1"/>
-      <inertial pos="0 0 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
-      <geom class="visual" mesh="unit" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
-      <geom class="collision" type="box" pos="-0.00041 -0.007855 -0.00003" size="0.0207 0.03163 0.01425"/>
+      <joint name="B_j1" pos="0 -0.011475 0"/>
+      <inertial pos="0 0.015 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
+      <geom name="B_actuator1" class="visual" mesh="actuator" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
+      <geom class="collision" type="box" pos="0.00134 0.00052 -0.00003" size="0.01895 0.02325 0.01425"/>
+      <!-- Hinge Frame 2 (Actuator 1 상단에 고정 결합) -->
+      <geom name="B_frame2" class="visual" mesh="hinge_frame" pos="0 0.0633 0" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
+
       <body name="B_link2" pos="0 0.0633 0">
-        <joint name="B_j2"/>
-        <inertial pos="0 0 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
-        <geom class="visual" mesh="unit" euler="0 0 3.14159" rgba="0.12 0.62 0.47 1"/>
-        <geom class="collision" type="box" pos="-0.00041 -0.007855 -0.00003" size="0.0207 0.03163 0.01425"/>
+        <joint name="B_j2" pos="0 -0.011475 0"/>
+        <inertial pos="0 0.015 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
+        <geom name="B_actuator2" class="visual" mesh="actuator" euler="0 0 3.14159" rgba="0.12 0.62 0.47 1"/>
+        <geom class="collision" type="box" pos="0.00134 0.00052 -0.00003" size="0.01895 0.02325 0.01425"/>
       </body>
     </body>
 
     <!-- ===== Finger C ===== -->
+    <!-- Hinge Frame 1 (Palm 베이스에 고정) -->
+    <geom name="C_frame1" class="visual" mesh="hinge_frame"
+          pos="0.0650 -0.0155 0.0100" euler="0 0 3.14159" rgba="0.22 0.47 0.76 1"/>
+
     <body name="C_link1" pos="0.0650 -0.0155 0.0100">
-      <joint name="C_j1"/>
-      <inertial pos="0 0 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
-      <geom class="visual" mesh="unit" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
-      <geom class="collision" type="box" pos="-0.00041 -0.007855 -0.00003" size="0.0207 0.03163 0.01425"/>
+      <joint name="C_j1" pos="0 -0.011475 0"/>
+      <inertial pos="0 0.015 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
+      <geom name="C_actuator1" class="visual" mesh="actuator" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
+      <geom class="collision" type="box" pos="0.00134 0.00052 -0.00003" size="0.01895 0.02325 0.01425"/>
+      <!-- Hinge Frame 2 (Actuator 1 상단에 고정 결합) -->
+      <geom name="C_frame2" class="visual" mesh="hinge_frame" pos="0 0.0633 0" euler="0 0 3.14159" rgba="0.82 0.29 0.36 1"/>
+
       <body name="C_link2" pos="0 0.0633 0">
-        <joint name="C_j2"/>
-        <inertial pos="0 0 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
-        <geom class="visual" mesh="unit" euler="0 0 3.14159" rgba="0.12 0.62 0.47 1"/>
-        <geom class="collision" type="box" pos="-0.00041 -0.007855 -0.00003" size="0.0207 0.03163 0.01425"/>
+        <joint name="C_j2" pos="0 -0.011475 0"/>
+        <inertial pos="0 0.015 0" mass="0.07" diaginertia="2.773e-05 1.486e-05 3.344e-05"/>
+        <geom name="C_actuator2" class="visual" mesh="actuator" euler="0 0 3.14159" rgba="0.12 0.62 0.47 1"/>
+        <geom class="collision" type="box" pos="0.00134 0.00052 -0.00003" size="0.01895 0.02325 0.01425"/>
       </body>
     </body>
   </worldbody>

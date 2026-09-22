@@ -17,11 +17,12 @@
     <geom name="floor" type="plane" size="1 1 0.05" pos="0 -0.16 0" zaxis="0 1 0"
           material="grid" contype="1" conaffinity="1"/>
 
-    <!-- 파지 대상 (팜 위, 세 손가락 사이) -->
+    <!-- 파지 대상 (팜 위, 세 손가락 사이)
     <body name="ball" pos="0.030 -0.038 0.058">
       <freejoint name="ball_free"/>
       <geom name="ball" type="sphere" size="0.025" mass="0.05"
             friction="1.0 0.005 0.0001" rgba="0.95 0.75 0.15 1"/>
     </body>
+    -->
   </worldbody>
 </mujoco>

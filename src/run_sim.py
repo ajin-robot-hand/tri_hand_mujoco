@@ -32,13 +32,17 @@ def apply_ctrl(model, data):
 
 
 def run_headless(model, data, seconds=8.0):
-    ball = model.body("ball").id
+    try:
+        ball = model.body("ball").id
+    except KeyError:
+        ball = None
     steps = int(seconds / model.opt.timestep)
     for i in range(steps):
         apply_ctrl(model, data)
         mujoco.mj_step(model, data)
         if i % int(1.0 / model.opt.timestep) == 0:
-            print(f"t={data.time:4.1f}s  ball(mm)={np.round(data.xpos[ball]*1000, 1)}  "
+            ball_str = f"ball(mm)={np.round(data.xpos[ball]*1000, 1)}  " if ball is not None else ""
+            print(f"t={data.time:4.1f}s  {ball_str}"
                   f"contacts={data.ncon}  max|qvel|={np.abs(data.qvel[:6]).max():.2f}")
     assert np.isfinite(data.qpos).all(), "시뮬레이션이 발산했습니다"
 
