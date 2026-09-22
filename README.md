@@ -5,7 +5,7 @@
 <p align="center">
   <img src="docs/mujoco.gif" alt="tri_hand MuJoCo 시뮬레이션 데모" width="100%">
   <br>
-  <em>🎬 시뮬레이션 데모 (고화질 원본: <a href="docs/mujoco.mp4">docs/mujoco.mp4</a>)</em>
+  <em>🎬 시뮬레이션 데모 </em>
 </p>
 
 ---
