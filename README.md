@@ -1,6 +1,6 @@
 # tri_hand MuJoCo 시뮬레이션
 
-3지 다관절 로봇 손(`tri_hand`)의 물리 시뮬레이션을 위한 MuJoCo 환경 프로젝트입니다.
+3지 다관절 로봇 손(`tri_hand`)의 물리 시뮬레이션을 위한 MuJoCo 프로젝트입니다.
 
 <p align="center">
   <img src="docs/mujoco.gif" alt="tri_hand MuJoCo 시뮬레이션 데모" width="100%">
@@ -37,6 +37,9 @@ source mujoco_env/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
+
+> 💡 **42 Cluster 환경 안내**:  
+> 42 Cluster 컴퓨터(NFS / Non-sudo 환경)에서도 Python 가상환경 구축 및 MuJoCo 실행이 가능합니다. 관련 세팅 가이드 및 자동화 스크립트는 `feat/cluster_com` 브랜치를 참고해 주세요. 
 
 ---
 
