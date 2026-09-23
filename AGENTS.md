@@ -7,15 +7,24 @@
 ## 1. 환경 및 실행 규칙 (Environment & Execution)
 
 - **Python 가상환경**:
-  - 가상환경 활성화: `source /goinfre/$USER/envs/mujoco_env/bin/activate`
-  - 시스템 기본 파이썬이 아닌 반드시 가상환경 바이너리를 사용하세요: `/goinfre/$USER/envs/mujoco_env/bin/python`
-  - 패키지 설치 시: `/goinfre/$USER/envs/mujoco_env/bin/pip`
-- **WSL2 환경 고려**:
-  - WSL2 특성상 GUI 뷰어(`mujoco.viewer`) 실행 시 디스플레이/렌더링 드라이버 이슈로 프로세스가 멈출(hang) 수 있습니다.
-  - 코드 동작 및 물리 엔진 검증 시에는 **항상 `--headless` 옵션을 기본으로 사용**하세요:
+  - 환경 복구/설정: 레포지토리 루트에서 `./setup_mujoco_env.sh` 실행
+  - 가상환경 활성화 (택1):
+    - `source activate.sh` (레포지토리 루트 권장)
+    - `conda activate /goinfre/$USER/envs/mujoco_env`
+    - `source /goinfre/$USER/miniforge3/bin/activate /goinfre/$USER/envs/mujoco_env`
+  - 실행 바이너리 (가상환경 내부 인터프리터 필수 사용):
+    - `python` 또는 `.venv/bin/python`
+    - (절대 경로 필요 시) `/goinfre/$USER/envs/mujoco_env/bin/python`
+  - 패키지 설치 시:
+    - `.venv/bin/pip install ...` 또는 `/goinfre/$USER/envs/mujoco_env/bin/pip install ...`
+
+- **42 리눅스 및 비-GUI 환경 고려**:
+  - 원격 접속 환경이나 X11 디스플레이 미연결 상태에서 GUI 뷰어(`mujoco.viewer`) 실행 시 렌더링 드라이버 이슈로 프로세스가 멈출(hang) 수 있습니다.
+  - Agent의 코드 동작 및 물리 엔진 검증 시에는 **항상 `--headless` 옵션을 기본으로 사용**하세요:
     ```bash
-    /goinfre/$USER/envs/mujoco_env/bin/python src/run_sim.py --headless
+    .venv/bin/python src/run_sim.py --headless
     ```
+
 - **XML 모델 유효성 사전 검증**:
   - `src/hand.xml` 또는 `src/scene.xml`을 수정한 후에는 시뮬레이션을 돌리기 전에 파이썬에서 XML 컴파일 에러 여부를 먼저 확인하세요:
     ```python

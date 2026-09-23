@@ -1,8 +1,13 @@
 # Python virtual environments
+mujoco_env
 mujoco_env/
+venv
 venv/
+.venv
 .venv/
+env
 env/
+activate.sh
 
 # Byte-compiled / cache files
 __pycache__/

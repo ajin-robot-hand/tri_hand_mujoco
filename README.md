@@ -1,6 +1,6 @@
 # tri_hand MuJoCo 시뮬레이션
 
-3지 다관절 로봇 손(`tri_hand`)의 물리 시뮬레이션을 위한 MuJoCo 환경 프로젝트입니다.
+3지 다관절 로봇 손(`tri_hand`)의 물리 시뮬레이션을 위한 MuJoCo입니다.
 
 <p align="center">
   <img src="docs/mujoco.gif" alt="tri_hand MuJoCo 시뮬레이션 데모" width="100%">
@@ -64,6 +64,28 @@ pip install -r requirements.txt
 1. WSL2 터미널을 실행합니다.
 2. 위의 **[1. Linux]** 가이드와 동일하게 `python3.10-venv` 설치 후 가상환경을 생성하고 실행합니다.
 
+### 4. 42 Cluster Linux (NFS / NON-sudo)
+
+저장소 루트에 포함된 자동화 스크립트를 사용하여 1분 만에 환경을 구축할 수 있습니다.
+
+```bash
+# 1) 원클릭 환경 구축 스크립트 실행
+# (NFS 캐시 우회, Goinfre 내 Miniforge 및 Python 3.10 설치, 패키지 세팅 자동 수행)
+./setup_mujoco_env.sh
+
+# 2) 가상환경 활성화 (택 1)
+source activate.sh
+# 또는 새 터미널 창인 경우:
+conda activate /goinfre/$USER/envs/mujoco_env
+
+# 3) 가상환경 비활성화
+conda deactivate
+```
+
+💡 클러스터 자리 이동 시 참고사항:
+
+/goinfre는 현재 PC의 로컬 디스크이므로 다른 자리로 이동하면 런타임이 유지되지 않습니다. 자리를 옮겼을 때는 해당 PC에서 리포지토리로 이동 후 다시 ./setup_mujoco_env.sh를 실행해 주시면 즉시 동일한 환경이 재구성됩니다.
+
 ---
 
 ## 🚀 시뮬레이션 실행 방법
@@ -87,6 +109,14 @@ OS 및 환경에 따라 뷰어 실행 명령어가 다릅니다.
   WSL2 환경에서는 그래픽 드라이버 이슈로 GUI 창이 멈출 수 있으므로, 물리 엔진 검증 시 `--headless` 옵션을 권장합니다.
   ```bash
   python src/run_sim.py --headless
+  ```
+
+- **42 Cluster Linux (클러스터 데스크탑 모니터)**:
+  ```bash
+  # 가상환경 활성화 상태에서 실행
+  python src/run_sim.py
+  # 또는 가상환경 활성화 없이 심볼릭 링크로 바로 실행할 경우
+  .venv/bin/python src/run_sim.py
   ```
 
 ---
