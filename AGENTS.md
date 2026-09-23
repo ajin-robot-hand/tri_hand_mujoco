@@ -7,13 +7,14 @@
 ## 1. 환경 및 실행 규칙 (Environment & Execution)
 
 - **Python 가상환경**:
-  - 시스템 기본 파이썬이 아닌 반드시 가상환경 바이너리를 사용하세요: `~/mujoco_env/bin/python`
-  - 패키지 설치 시: `~/mujoco_env/bin/pip`
+  - 가상환경 활성화: `source /goinfre/$USER/envs/mujoco_env/bin/activate`
+  - 시스템 기본 파이썬이 아닌 반드시 가상환경 바이너리를 사용하세요: `/goinfre/$USER/envs/mujoco_env/bin/python`
+  - 패키지 설치 시: `/goinfre/$USER/envs/mujoco_env/bin/pip`
 - **WSL2 환경 고려**:
   - WSL2 특성상 GUI 뷰어(`mujoco.viewer`) 실행 시 디스플레이/렌더링 드라이버 이슈로 프로세스가 멈출(hang) 수 있습니다.
   - 코드 동작 및 물리 엔진 검증 시에는 **항상 `--headless` 옵션을 기본으로 사용**하세요:
     ```bash
-    ~/mujoco_env/bin/python src/run_sim.py --headless
+    /goinfre/$USER/envs/mujoco_env/bin/python src/run_sim.py --headless
     ```
 - **XML 모델 유효성 사전 검증**:
   - `src/hand.xml` 또는 `src/scene.xml`을 수정한 후에는 시뮬레이션을 돌리기 전에 파이썬에서 XML 컴파일 에러 여부를 먼저 확인하세요:
