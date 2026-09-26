@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tri_hand 대시보드</title>
+<style>
+  :root { --bg: #fff; --fg: #1d1d1f; --muted: #6e6e73; --line: #d2d2d7; --ok: #1a7f37; --bad: #cf222e; --head: #f5f5f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161618; --fg: #f5f5f7; --muted: #a1a1a6; --line: #3a3a3c; --ok: #3fb950; --bad: #f85149; --head: #1f1f22; }
+  }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-bottom: 12px; }
+  .bar b { font-variant-numeric: tabular-nums; }
+  #conn.ok { color: var(--ok); } #conn.bad { color: var(--bad); }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: right; white-space: nowrap; }
+  th { background: var(--head); font-weight: 600; }
+  td:first-child, th:first-child { text-align: left; }
+  th.edit { border-left: 2px solid var(--line); }
+  td.edit-first { border-left: 2px solid var(--line); }
+  input[type=number] { width: 76px; font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 2px 4px; }
+  input:invalid { border-color: var(--bad); }
+  section { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  select, button, input[type=text] { font: inherit; padding: 4px 8px; }
+  #msg { margin-top: 8px; min-height: 1.4em; }
+  #msg.bad { color: var(--bad); } #msg.ok { color: var(--ok); }
+  .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>tri_hand 시뮬레이션 대시보드</h1>
+<div class="bar">
+  <span>연결: <b id="conn">확인 중</b></span>
+  <span>시뮬레이션 시각: <b id="time">-</b> s</span>
+  <span>접촉 수: <b id="contacts">-</b></span>
+</div>
+
+<div class="scroll">
+<table>
+  <thead>
+    <tr>
+      <th>관절</th><th>현재 각도<br>rad</th><th>목표 각도<br>rad</th><th>속도<br>rad/s</th><th>토크<br>N·m</th>
+      <th>kp</th><th>kv</th><th>토크 한계<br>N·m</th>
+      <th class="edit">편집: 목표<br>rad</th><th>편집: kp</th><th>편집: kv</th><th>편집: 토크 한계</th>
+    </tr>
+  </thead>
+  <tbody id="rows"></tbody>
+</table>
+</div>
+
+<section>
+  <label>프리셋 <select id="preset"><option value="">(선택)</option></select></label>
+  <button id="apply" disabled>적용</button>
+  <span style="width:16px"></span>
+  <input id="name" type="text" placeholder="프리셋 이름" maxlength="40">
+  <button id="save">편집 값을 프리셋으로 저장</button>
+</section>
+<div id="msg"></div>
+<p class="note">
+  프리셋을 고르면 편집 칸에만 값이 채워지고 시뮬레이션은 바뀌지 않습니다. "적용"을 눌러야 저장된 프리셋이 반영됩니다.
+  저장하지 않은 편집 값은 적용되지 않습니다.
+</p>
+
+<script>
+const $ = id => document.getElementById(id);
+const FIELDS = ["target", "kp", "kv", "torque_limit"];
+let joints = {}, presets = {}, exclusiveMin = [];
+
+function msg(text, ok) { $("msg").textContent = text; $("msg").className = ok ? "ok" : "bad"; }
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  const body = await r.json().catch(() => null);
+  if (!r.ok) {
+    const d = body && body.detail;
+    throw new Error(typeof d === "string" ? d : (d || []).map(e => e.msg).join("; ") || r.statusText);
+  }
+  return body;
+}
+
+function buildRows(limits, state) {
+  $("rows").innerHTML = Object.keys(joints).map(n => {
+    const [lo, hi] = joints[n].ctrlrange;
+    const range = {
+      target: [lo, hi], kp: limits.kp, kv: limits.kv, torque_limit: limits.torque_limit,
+    };
+    const inputs = FIELDS.map((f, i) =>
+      `<td${i === 0 ? ' class="edit-first"' : ""}><input type="number" id="in-${n}-${f}" step="any" ` +
+      `min="${range[f][0]}" max="${range[f][1]}" ` +
+      `title="${range[f][0]} ${exclusiveMin.includes(f) ? "<" : "≤"} 값 ≤ ${range[f][1]}" required></td>`).join("");
+    return `<tr><td>${n}</td>` +
+      ["q", "ctrl", "qd", "f", "kp", "kv", "tl"].map(k => `<td id="${k}-${n}">-</td>`).join("") + inputs + "</tr>";
+  }).join("");
+  // 편집 칸의 첫 값은 현재 시뮬레이션 값
+  fillForm(Object.fromEntries(Object.keys(joints).map(n => [n, { target: state.targets[n], ...state.gains[n] }])));
+}
+
+function fillForm(values) {
+  for (const n in values) for (const f of FIELDS) $(`in-${n}-${f}`).value = +values[n][f].toFixed(4);
+}
+
+function readForm() {
+  const out = {};
+  for (const n in joints) {
+    out[n] = {};
+    for (const f of FIELDS) {
+      const el = $(`in-${n}-${f}`);
+      // min 속성은 경계값을 허용하므로, 서버가 > 로 검사하는 필드는 여기서 경계값을 따로 거부
+      if (!el.checkValidity() || el.value === "" || (exclusiveMin.includes(f) && Number(el.value) <= Number(el.min)))
+        throw new Error(`${n} ${f}: ${el.title} 범위의 숫자를 입력하세요`);
+      out[n][f] = Number(el.value);
+    }
+  }
+  return out;
+}
+
+function render(s) {
+  $("time").textContent = s.time.toFixed(2);
+  $("contacts").textContent = s.contacts;
+  const fmt = v => v.toFixed(3);
+  for (const n in joints) {
+    $(`q-${n}`).textContent = fmt(s.joints[n]);
+    $(`ctrl-${n}`).textContent = fmt(s.targets[n]);
+    $(`qd-${n}`).textContent = fmt(s.velocities[n]);
+    $(`f-${n}`).textContent = fmt(s.forces[n]);
+    $(`kp-${n}`).textContent = s.gains[n].kp.toFixed(2);
+    $(`kv-${n}`).textContent = s.gains[n].kv.toFixed(2);
+    $(`tl-${n}`).textContent = s.gains[n].torque_limit.toFixed(2);
+  }
+}
+
+async function refreshPresets(select) {
+  presets = await api("/presets");
+  const sel = $("preset");
+  sel.replaceChildren(new Option("(선택)", ""), ...Object.keys(presets).map(n => new Option(n, n)));
+  sel.value = select || "";
+  $("apply").disabled = !sel.value;
+}
+
+async function poll() {
+  try {
+    render(await api("/state"));
+    $("conn").textContent = "연결됨"; $("conn").className = "ok";
+  } catch (e) {
+    $("conn").textContent = "끊김"; $("conn").className = "bad";
+  }
+  setTimeout(poll, 200);
+}
+
+// 선택은 편집 칸만 채움. 서버에는 아무 요청도 보내지 않음
+$("preset").onchange = () => {
+  const n = $("preset").value;
+  $("apply").disabled = !n;
+  if (n) { fillForm(presets[n]); $("name").value = n; }
+};
+
+$("apply").onclick = async () => {
+  const n = $("preset").value;
+  try {
+    render(await api(`/presets/${encodeURIComponent(n)}/apply`, { method: "POST" }));
+    msg(`"${n}" 적용함`, true);
+  } catch (e) { msg(`적용 실패: ${e.message}`); }
+};
+
+$("save").onclick = async () => {
+  const n = $("name").value.trim();
+  try {
+    if (!n) throw new Error("프리셋 이름을 입력하세요");
+    const r = await api(`/presets/${encodeURIComponent(n)}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(readForm()),
+    });
+    await refreshPresets(n);
+    msg(`"${n}" ${r.created ? "새로 저장함" : "수정함"} (아직 적용 안 됨)`, true);
+  } catch (e) { msg(`저장 실패: ${e.message}`); }
+};
+
+(async () => {
+  try {
+    const [j, l, s] = await Promise.all([api("/joints"), api("/limits"), api("/state")]);
+    joints = j; exclusiveMin = l.exclusive_min;
+    buildRows(l, s);
+  } catch (e) { msg(`초기화 실패: ${e.message}`); $("conn").textContent = "끊김"; $("conn").className = "bad"; return; }
+  poll();   // 프리셋 목록을 못 읽어도 실시간 상태는 계속 표시
+  try { await refreshPresets(); } catch (e) { msg(`프리셋 목록 읽기 실패: ${e.message}`); }
+})();
+</script>
+</body>
+</html>
